@@ -1,10 +1,9 @@
 const conn = require('../database/db');
-const bcrypt = require('bcrypt');
-const saltRounds = 8;
+const { hasingData, compareHash } = require('../utils/hashing')
 
 module.exports = {
     saveUser: async function (req, res) {
-        const hashPassword = await bcrypt.hash(req.body.password, saltRounds);
+        const hashPassword = await hasingData(req.body.password);
         conn.query('INSERT INTO users SET ? ', [{
             'names': req.body.names,
             'email': req.body.email,
@@ -13,7 +12,7 @@ module.exports = {
         }], (err, results, fields)=>{
             if (err) {
                 console.log(err);
-                res.status(500).send(err.sqlMessage);
+                res.status(400).send(err.sqlMessage);
             } else {
                 if (results.affectedRows === 0) {
                     res.status(500).send('Usuario ya se encuentra registrado o se esta haciendo mal la peticion')
